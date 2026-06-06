@@ -1,215 +1,84 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Employee Information Manager</title>
-    <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css"/>
-    <script defer src="https://pyscript.net/latest/pyscript.js"></script>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 600px;
-            margin: 50px auto;
-            padding: 20px;
-            background-color: #f5f5f5;
-        }
-        h1 {
-            color: #333;
-            text-align: center;
-        }
-        .form-container {
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        label {
-            display: block;
-            margin-top: 15px;
-            font-weight: bold;
-            color: #333;
-        }
-        input {
-            width: 100%;
-            padding: 8px;
-            margin-top: 5px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            box-sizing: border-box;
-        }
-        button {
-            margin-top: 20px;
-            padding: 10px 20px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-            width: 100%;
-        }
-        button:hover {
-            background-color: #45a049;
-        }
-        #output {
-            margin-top: 20px;
-            padding: 15px;
-            background-color: #f9f9f9;
-            border-left: 4px solid #4CAF50;
-            display: none;
-        }
-    </style>
+  <title>Login - User Data Handler</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { font-family: Arial; display: flex; justify-content: center; align-items: center; height: 100vh; background: #f5f5f5; margin: 0; }
+    .box { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); width: 300px; }
+    h2 { margin-top: 0; text-align: center; }
+    input { width: 100%; padding: 12px; margin: 8px 0; box-sizing: border-box; border: 1px solid #ddd; border-radius: 6px; }
+    button { width: 100%; padding: 12px; margin: 8px 0; background: #4285f4; color: white; border: none; border-radius: 6px; cursor: pointer; }
+    button:hover { background: #357ae8; }
+    #msg { text-align: center; color: red; font-size: 14px; min-height: 20px; }
+    .toggle { text-align: center; margin-top: 15px; font-size: 14px; color: #4285f4; cursor: pointer; }
+  </style>
 </head>
 <body>
+  <div class="box">
+    <h2 id="form-title">Login</h2>
+    <input type="email" id="email" placeholder="Email">
+    <input type="password" id="password" placeholder="Password">
+    <button id="action-btn">Login</button>
+    <p id="msg"></p>
+    <div class="toggle" id="toggle">Need an account? Sign up</div>
+  </div>
 
-    <h1>Employee Information Manager</h1>
+  <script type="module">
+    // Import Firebase SDKs
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-    <div class="form-container">
-        <py-script src="../main.py"></py-script>
+    // PASTE YOUR firebaseConfig HERE
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_AUTH_DOMAIN",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_STORAGE_BUCKET",
+      messagingSenderId: "YOUR_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
 
-        <script>
-        async function saveFile(content){
-            if (window.showSaveFilePicker) {
-                try {
-                    const opts = { suggestedName: 'employees.txt', startIn: 'documents' };
-                    const handle = await window.showSaveFilePicker(opts);
-                    let existing = '';
-                    try {
-                        const file = await handle.getFile();
-                        existing = await file.text();
-                    } catch (e) {
-                        // ignore if file doesn't exist or can't be read
-                    }
-                    const writable = await handle.createWritable();
-                    await writable.write(existing + content);
-                    await writable.close();
-                    return true;
-                } catch (e) {
-                    console.error(e);
-                }
-            }
-            // Fallback: trigger download
-            const blob = new Blob([content], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'employees.txt';
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-            URL.revokeObjectURL(url);
-            return true;
-        }
-        </script>
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
 
-        <script>
-        // Global list to accumulate employee entries
-        let employeeList = [];
+    let isLogin = true;
+    const title = document.getElementById('form-title');
+    const btn = document.getElementById('action-btn');
+    const toggle = document.getElementById('toggle');
+    const msg = document.getElementById('msg');
 
-        async function saveToDocs(){
-            if (employeeList.length === 0) {
-                alert('No employees to save. Please submit at least one entry.');
-                return;
-            }
-            const content = employeeList.join('');
-            if (window.showSaveFilePicker) {
-                try {
-                    const opts = { suggestedName: 'employees.txt', startIn: 'documents' };
-                    const handle = await window.showSaveFilePicker(opts);
-                    const writable = await handle.createWritable();
-                    await writable.write(content);
-                    await writable.close();
-                    alert('File saved successfully!');
-                    employeeList = [];
-                    document.getElementById('count').innerText = '0';
-                    return;
-                } catch (e) {
-                    console.error(e);
-                }
-            }
-            // Fallback: trigger download
-            const blob = new Blob([content], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'employees.txt';
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-            URL.revokeObjectURL(url);
-            employeeList = [];
-            document.getElementById('count').innerText = '0';
-        }
-        </script>
-
-        <label for="name">Name:</label>
-        <input type="text" id="name" placeholder="Enter name">
-
-        <label for="employee_id">Employee ID:</label>
-        <input type="text" id="employee_id" placeholder="Enter employee ID">
-
-        <label for="department">Department:</label>
-        <input type="text" id="department" placeholder="Enter department">
-
-        <label for="salary">Salary:</label>
-        <input type="text" id="salary" placeholder="Enter salary">
-
-        <button id="submit">Submit</button>
-        <button id="save" style="background-color: #008CBA; margin-left: 10px;">Save to File</button>
-        <p style="text-align: center; color: #666; margin-top: 10px;">Entries to save: <span id="count">0</span></p>
-
-        <div id="output"></div>
-    </div>
-
-    <script>
-    async function handleSubmit() {
-        // Get form values
-        const name = document.getElementById("name").value;
-        const employee_id = document.getElementById("employee_id").value;
-        const department = document.getElementById("department").value;
-        const salary = document.getElementById("salary").value;
-
-        if (!name || !employee_id || !department || !salary) {
-            document.getElementById("output").innerHTML = "<p style='color: red;'>All fields are required!</p>";
-            document.getElementById("output").style.display = "block";
-            return;
-        }
-
-        // Display information
-        let output_html = "<h3>Employee Information:</h3>";
-        output_html += "<p><strong>Name:</strong> " + name + "</p>";
-        output_html += "<p><strong>Employee_id:</strong> " + employee_id + "</p>";
-        output_html += "<p><strong>Department:</strong> " + department + "</p>";
-        output_html += "<p><strong>Salary:</strong> " + salary + "</p>";
-
-        document.getElementById("output").innerHTML = output_html;
-        document.getElementById("output").style.display = "block";
-
-        // Prepare content and add to list
-        let file_content = "Employee Information:\n";
-        file_content += "Name: " + name + "\n";
-        file_content += "Employee_id: " + employee_id + "\n";
-        file_content += "Department: " + department + "\n";
-        file_content += "Salary: " + salary + "\n";
-        file_content += "\n";
-
-        employeeList.push(file_content);
-        document.getElementById("count").innerText = employeeList.length;
-
-        // Clear form
-        document.getElementById("name").value = "";
-        document.getElementById("employee_id").value = "";
-        document.getElementById("department").value = "";
-        document.getElementById("salary").value = "";
-    }
-
-    // Bind buttons
-    document.addEventListener("DOMContentLoaded", function() {
-        document.getElementById("submit").addEventListener("click", handleSubmit);
-        document.getElementById("save").addEventListener("click", saveToDocs);
+    // If already logged in, go to dashboard
+    onAuthStateChanged(auth, (user) => {
+      if (user) window.location.href = 'dashboard.html';
     });
-    </script>
 
+    // Toggle Login / Sign Up
+    toggle.onclick = () => {
+      isLogin = !isLogin;
+      title.innerText = isLogin ? 'Login' : 'Sign Up';
+      btn.innerText = isLogin ? 'Login' : 'Sign Up';
+      toggle.innerText = isLogin ? 'Need an account? Sign up' : 'Have an account? Login';
+      msg.innerText = '';
+    };
+
+    // Handle Login or Sign Up
+    btn.onclick = async () => {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      msg.innerText = '';
+
+      try {
+        if (isLogin) {
+          await signInWithEmailAndPassword(auth, email, password);
+        } else {
+          await createUserWithEmailAndPassword(auth, email, password);
+        }
+        // onAuthStateChanged will redirect
+      } catch (error) {
+        msg.innerText = error.message.replace('Firebase: ', '');
+      }
+    };
+  </script>
 </body>
 </html>

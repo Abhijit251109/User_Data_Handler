@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<head>
+
+    <title>Dashboard - User Data Handler</title>
+    <style>
+        body {font-family: Arial; padding: 40px;}
+        button {padding: 10px 20px; background: #db4437; color: white; border-radius: 6px; cursor: pointer;}
+        </style>
+</head>
+<body>
+    <h1>Welcome to User Data Handler </h1>
+    <p> Logged in as: <span id="user-email"></span></p>
+    <button id="logout">Logout</button>
+
+    <script type= "module">
+         import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+         import {getAuth, onAuthStateChanged, signOut} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+         const firebaseConfig = {
+  apiKey: "AIzaSyAqMTkqnv7PbgMLFC1Dsr6xUC5F4Q5_cwk",
+  authDomain: "user-data-handler.firebaseapp.com",
+  projectId: "user-data-handler",
+  storageBucket: "user-data-handler.firebasestorage.app",
+  messagingSenderId: "86059970806",
+  appId: "1:86059970806:web:de794abb0b5cded13b3cd7"
+};
+
+            const app = initializeApp(firebaseConfig);
+            const auth = getAuth(app);
+
+            onAuthStateChanged(auth, (user) => {
+
+                if (user) {
+                    document.getElementById("user-email").innerText = user.email;
+                } else {
+                    window.location.href = "index.html";
+                }
+            });
+
+            document.getElementById("logout").onclick = () => signOut(auth);
+    </script>
+</body>
+</html> 
