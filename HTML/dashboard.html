@@ -16,8 +16,11 @@
          import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
          import {getAuth, onAuthStateChanged, signOut} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
+         import {FIREBASE_API_KEY} from "./config.js";
+
+
          const firebaseConfig = {
-  apiKey: "AIzaSyAqMTkqnv7PbgMLFC1Dsr6xUC5F4Q5_cwk",
+  apiKey: FIREBASE_API_KEY,
   authDomain: "user-data-handler.firebaseapp.com",
   projectId: "user-data-handler",
   storageBucket: "user-data-handler.firebasestorage.app",
