@@ -18,32 +18,36 @@
 
 
 
-         // Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+            <<<<<<< HEAD
+                    // Import the functions you need from the SDKs you need
+            =======
+                    // Import the functions you need from the SDKs you need
+         >>>>>>> e348b63cfcfede30afaf2090b40131fe3729229e
+         import { initializeApp } from "firebase/app";
+            // TODO: Add SDKs for Firebase products that you want to use
+            // https://firebase.google.com/docs/web/setup#available-libraries
 
-// Your web app's Firebase configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyAqMTkqnv7PbgMLFC1Dsr6xUC5F4Q5_cwk",
-  authDomain: "user-data-handler.firebaseapp.com",
-  projectId: "user-data-handler",
-  storageBucket: "user-data-handler.firebasestorage.app",
-  messagingSenderId: "86059970806",
-  appId: "1:86059970806:web:de794abb0b5cded13b3cd7"
-};
+            // Your web app's Firebase configuration
+         const firebaseConfig = {
+            apiKey: "AIzaSyAqMTkqnv7PbgMLFC1Dsr6xUC5F4Q5_cwk",
+            authDomain: "user-data-handler.firebaseapp.com",
+            projectId: "user-data-handler",
+            storageBucket: "user-data-handler.firebasestorage.app",
+            messagingSenderId: "86059970806",
+            appId: "1:86059970806:web:de794abb0b5cded13b3cd7"
+            };
 
 // Initialize Firebase
 
-            const app = initializeApp(firebaseConfig);
-            const auth = getAuth(app);
+         const app = initializeApp(firebaseConfig);
+         const auth = getAuth(app);
 
-            onAuthStateChanged(auth, (user) => {
+         onAuthStateChanged(auth, (user) => {
 
-                if (user) {
-                    document.getElementById("user-email").innerText = user.email;
-                } else {
-                    window.location.href = "index.html";
+            if (user) {
+                document.getElementById("user-email").innerText = user.email;
+                    } else {
+                        window.location.href = "index.html";
                 }
             });
 
